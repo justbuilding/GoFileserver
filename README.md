@@ -104,6 +104,38 @@ curl -X POST http://localhost:8080 -F "file=@test.txt" -F "dir=docs" -F "token=s
 curl "http://localhost:8080/docs/test.txt?token=secret123&version=1.0.0" -o test.txt
 ```
 
+## Kubernetes 部署
+
+### 快速部署
+
+```bash
+# 应用部署配置
+kubectl apply -f k8s-deployment.yaml
+
+# 查看部署状态
+kubectl get deployments
+kubectl get pods
+kubectl get services
+```
+
+### 访问服务
+
+服务将通过 NodePort 暴露在 `30080` 端口：
+
+```bash
+# 访问地址
+http://<节点IP>:30080
+```
+
+### 配置说明
+
+- **副本数**：1
+- **容器端口**：8080
+- **NodePort**：30080
+- **资源限制**：CPU 1核，内存 512Mi
+- **健康检查**： readiness 和 liveness 探针
+- **存储**：使用 emptyDir 临时存储（可根据需要修改为持久卷）
+
 ## License
 
 GPL-3.0 License
