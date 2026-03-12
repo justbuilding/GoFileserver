@@ -17,6 +17,8 @@ FROM alpine:latest
 
 ENV WEB_PORT=8080
 ENV WEB_PATH=/web/www
+ENV AUTH_USER=
+ENV AUTH_PASS=
 WORKDIR /web/
 
 # 根据架构复制对应二进制文件

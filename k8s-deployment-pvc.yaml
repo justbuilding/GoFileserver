@@ -50,6 +50,11 @@ spec:
         image: registry.cn-hangzhou.aliyuncs.com/public_hjj_images/go-fileserver:latest
         ports:
         - containerPort: 8080
+        env:
+        - name: AUTH_USER
+          value: "admin"
+        - name: AUTH_PASS
+          value: "password123"
         volumeMounts:
         - name: www-volume
           mountPath: /web/www

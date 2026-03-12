@@ -14,17 +14,44 @@ var (
 	ConfigSource string
 	WebPort      int
 	WebPath      string
+	AuthUser     string
+	AuthPass     string
 )
 
 func init() {
 	flag.StringVar(&ConfigSource, "c", "default", "config source default or env.")
 	flag.IntVar(&WebPort, "port", 8080, "web port.")
 	flag.StringVar(&WebPath, "path", "./www", "web path.")
+	flag.StringVar(&AuthUser, "user", "", "authentication username")
+	flag.StringVar(&AuthPass, "pass", "", "authentication password")
 	flag.Parse()
 
 	if ConfigSource == "env" {
 		WebPort = getEnvInt("WEB_PORT", WebPort)
 		WebPath = getEnvString("WEB_PATH", WebPath)
+		AuthUser = getEnvString("AUTH_USER", AuthUser)
+		AuthPass = getEnvString("AUTH_PASS", AuthPass)
+	}
+}
+
+func basicAuth(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// 如果没有设置认证信息，则直接通过
+		if AuthUser == "" || AuthPass == "" {
+			next(w, r)
+			return
+		}
+
+		// 从请求中获取认证信息
+		user, pass, ok := r.BasicAuth()
+		if !ok || user != AuthUser || pass != AuthPass {
+			w.Header().Set("WWW-Authenticate", `Basic realm="GoFileserver"`)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		// 认证通过，继续处理请求
+		next(w, r)
 	}
 }
 
@@ -37,8 +64,8 @@ func main() {
 		fmt.Printf("Error creating directory: %v\n", err)
 	}
 
-	// 注册处理函数
-	http.HandleFunc("/", handleRequest)
+	// 注册处理函数，添加认证中间件
+	http.HandleFunc("/", basicAuth(handleRequest))
 	err := http.ListenAndServe(fmt.Sprintf(":%d", WebPort), nil)
 	if err != nil {
 		fmt.Printf(err.Error())

@@ -82,6 +82,8 @@ GOOS=linux GOARCH=arm64 go build -o output/GoFileserver_linux_arm64
 | -port | 8080 | 服务器监听端口 |
 | -path | ./www | 文件存储路径 |
 | -c | default | 配置方式（default/env） |
+| -user | "" | 认证用户名（为空表示不需要认证） |
+| -pass | "" | 认证密码（为空表示不需要认证） |
 
 ## 环境变量
 
@@ -89,6 +91,36 @@ GOOS=linux GOARCH=arm64 go build -o output/GoFileserver_linux_arm64
 |---------|---------|------|
 | WEB_PORT | -port | 服务器监听端口 |
 | WEB_PATH | -path | 文件存储路径 |
+| AUTH_USER | -user | 认证用户名 |
+| AUTH_PASS | -pass | 认证密码 |
+
+## 认证功能
+
+GoFileserver 支持基本的 HTTP 认证功能，可以通过以下方式启用：
+
+### 命令行方式
+```bash
+./GoFileserver -port 8080 -path ./www -user admin -pass password123
+```
+
+### Docker 方式
+```bash
+docker run -d -p 8080:8080 -v ./www:/web/www \
+  -e AUTH_USER=admin -e AUTH_PASS=password123 \
+  registry.cn-hangzhou.aliyuncs.com/public_hjj_images/go-fileserver:latest
+```
+
+### 访问带认证的服务
+
+使用 curl 访问需要认证的服务：
+```bash
+# 下载文件
+curl -u admin:password123 "http://localhost:8080/path/to/file" -o local-file
+
+# 上传文件
+curl -u admin:password123 -X POST http://localhost:8080 \
+  -F "file=@local-file" -F "dir=upload" -F "token=123"
+```
 
 ## 示例
 
