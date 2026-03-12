@@ -15,3 +15,9 @@
 # vendor/
 /release
 /build
+
+# GoFileserver binary
+GoFileserver
+
+# Output directory
+/output
