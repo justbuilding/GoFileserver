@@ -233,7 +233,10 @@ http://<节点IP>:30080
   - 域名：`fileserver.example.com`
   - 路径：`/`
   - 后端服务：gofileserver:8080
-  - 注解：使用 nginx ingress 控制器
+  - 注解：
+    - 使用 nginx ingress 控制器
+    - 文件上传大小限制：100MB
+    - 代理读写超时：10分钟（适合大文件传输）
 
 ## License
 
