@@ -33,20 +33,22 @@ spec:
             cpu: "1"
             memory: "512Mi"
           requests:
-            cpu: "500m"
-            memory: "256Mi"
+            cpu: "200m"
+            memory: "128Mi"
         readinessProbe:
           httpGet:
             path: /
             port: 8080
-          initialDelaySeconds: 5
-          periodSeconds: 10
+          initialDelaySeconds: 10
+          periodSeconds: 15
+          timeoutSeconds: 5
         livenessProbe:
           httpGet:
             path: /
             port: 8080
-          initialDelaySeconds: 15
-          periodSeconds: 20
+          initialDelaySeconds: 20
+          periodSeconds: 30
+          timeoutSeconds: 10
       volumes:
       - name: www-volume
         emptyDir: {}
