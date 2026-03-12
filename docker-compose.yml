@@ -1,0 +1,9 @@
+services:
+  gofileserver:
+    image: registry.cn-hangzhou.aliyuncs.com/public_hjj_images/go-fileserver:latest
+    container_name: GoFileserver
+    restart: unless-stopped
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./www:/web/www
