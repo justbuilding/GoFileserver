@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: gofileserver-pv
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/data/gofileserver"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gofileserver-pvc
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  selector:
+    matchLabels:
+      type: local
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gofileserver
+  namespace: default
+  labels:
+    app: gofileserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gofileserver
+  template:
+    metadata:
+      labels:
+        app: gofileserver
+    spec:
+      containers:
+      - name: gofileserver
+        image: registry.cn-hangzhou.aliyuncs.com/public_hjj_images/go-fileserver:latest
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: www-volume
+          mountPath: /web/www
+        resources:
+          limits:
+            cpu: "1"
+            memory: "512Mi"
+          requests:
+            cpu: "500m"
+            memory: "256Mi"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 20
+      volumes:
+      - name: www-volume
+        persistentVolumeClaim:
+          claimName: gofileserver-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gofileserver
+  namespace: default
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 30080
+  selector:
+    app: gofileserver
