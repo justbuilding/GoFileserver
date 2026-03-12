@@ -83,50 +83,75 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleUpload(w http.ResponseWriter, r *http.Request) {
-	// 解析多部分表单
-	r.ParseMultipartForm(10 << 20) // 10MB 限制
-
-	// 获取上传的文件
-	file, handler, err := r.FormFile("file")
+	// 使用 MultipartReader 进行流式处理，避免内存占用
+	reader, err := r.MultipartReader()
 	if err != nil {
-		fmt.Fprintf(w, "Error retrieving file: %v\n", err)
+		fmt.Fprintf(w, "Error creating multipart reader: %v\n", err)
 		return
 	}
-	defer file.Close()
 
-	// 获取额外参数
-	dir := r.FormValue("dir")
+	var filename string
+	var dir string
 
-	// 构建保存路径
-	savePath := WebPath
-	if dir != "" {
-		savePath = filepath.Join(savePath, dir)
-		// 创建目录
-		if err := os.MkdirAll(savePath, 0755); err != nil {
-			fmt.Fprintf(w, "Error creating directory: %v\n", err)
+	// 处理多部分表单
+	for {
+		part, err := reader.NextPart()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			fmt.Fprintf(w, "Error reading multipart part: %v\n", err)
 			return
 		}
-	}
-	savePath = filepath.Join(savePath, handler.Filename)
-	
-	// 创建目标文件
-	dst, err := os.Create(savePath)
-	if err != nil {
-		fmt.Fprintf(w, "Error creating file: %v\n", err)
-		return
-	}
-	defer dst.Close()
 
-	// 复制文件内容
-	if _, err = io.Copy(dst, file); err != nil {
-		fmt.Fprintf(w, "Error saving file: %v\n", err)
-		return
+		if part.FormName() == "file" {
+			// 处理文件上传
+			filename = part.FileName()
+			
+			// 构建保存路径
+			savePath := WebPath
+			if dir != "" {
+				savePath = filepath.Join(savePath, dir)
+				// 创建目录
+				if err := os.MkdirAll(savePath, 0755); err != nil {
+					fmt.Fprintf(w, "Error creating directory: %v\n", err)
+					return
+				}
+			}
+			savePath = filepath.Join(savePath, filename)
+			
+			// 创建目标文件
+			dst, err := os.Create(savePath)
+			if err != nil {
+				fmt.Fprintf(w, "Error creating file: %v\n", err)
+				return
+			}
+			
+			// 流式复制文件内容
+			if _, err = io.Copy(dst, part); err != nil {
+				dst.Close()
+				fmt.Fprintf(w, "Error saving file: %v\n", err)
+				return
+			}
+			dst.Close()
+		} else if part.FormName() == "dir" {
+			// 处理目录参数
+			if dirContent, err := io.ReadAll(part); err == nil {
+				dir = string(dirContent)
+			}
+		}
+		
+		part.Close()
 	}
 
-	// 输出上传结果和参数
-	fmt.Fprintf(w, "GoFileserver uploaded successfully: %s\n", handler.Filename)
-	if dir != "" {
-		fmt.Fprintf(w, "Directory: %s\n", dir)
+	// 输出上传结果
+	if filename != "" {
+		fmt.Fprintf(w, "GoFileserver uploaded successfully: %s\n", filename)
+		if dir != "" {
+			fmt.Fprintf(w, "Directory: %s\n", dir)
+		}
+	} else {
+		fmt.Fprintf(w, "Error: No file uploaded\n")
 	}
 }
 
