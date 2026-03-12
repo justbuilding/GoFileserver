@@ -63,20 +63,8 @@ spec:
             cpu: "1"
             memory: "512Mi"
           requests:
-            cpu: "500m"
-            memory: "256Mi"
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 8080
-          initialDelaySeconds: 5
-          periodSeconds: 10
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 8080
-          initialDelaySeconds: 15
-          periodSeconds: 20
+            cpu: "200m"
+            memory: "128Mi"
       volumes:
       - name: www-volume
         persistentVolumeClaim:

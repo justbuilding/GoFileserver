@@ -35,20 +35,6 @@ spec:
           requests:
             cpu: "200m"
             memory: "128Mi"
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 8080
-          initialDelaySeconds: 10
-          periodSeconds: 15
-          timeoutSeconds: 5
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 8080
-          initialDelaySeconds: 20
-          periodSeconds: 30
-          timeoutSeconds: 10
       volumes:
       - name: www-volume
         emptyDir: {}
