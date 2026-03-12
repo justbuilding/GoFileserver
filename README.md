@@ -47,9 +47,6 @@ services:
 ```bash
 # 基本下载
 curl http://localhost:8080/path/to/file -o local-file
-
-# 带参数下载
-curl "http://localhost:8080/path/to/file?token=123&version=1.0" -o local-file
 ```
 
 ### 2. 上传文件
@@ -58,8 +55,8 @@ curl "http://localhost:8080/path/to/file?token=123&version=1.0" -o local-file
 # 基本上传
 curl -X POST http://localhost:8080 -F "file=@local-file"
 
-# 带参数上传（指定目录和token）
-curl -X POST http://localhost:8080 -F "file=@local-file" -F "dir=upload" -F "token=123"
+# 带参数上传（指定目录）
+curl -X POST http://localhost:8080 -F "file=@local-file" -F "dir=upload"
 ```
 
 ## 多架构编译
@@ -119,7 +116,7 @@ curl -u admin:password123 "http://localhost:8080/path/to/file" -o local-file
 
 # 上传文件
 curl -u admin:password123 -X POST http://localhost:8080 \
-  -F "file=@local-file" -F "dir=upload" -F "token=123"
+  -F "file=@local-file" -F "dir=upload"
 ```
 
 ## 示例
@@ -127,13 +124,13 @@ curl -u admin:password123 -X POST http://localhost:8080 \
 ### 上传文件到指定目录
 
 ```bash
-curl -X POST http://localhost:8080 -F "file=@test.txt" -F "dir=docs" -F "token=secret123"
+curl -X POST http://localhost:8080 -F "file=@test.txt" -F "dir=docs"
 ```
 
-### 带版本参数下载文件
+### 下载文件
 
 ```bash
-curl "http://localhost:8080/docs/test.txt?token=secret123&version=1.0.0" -o test.txt
+curl http://localhost:8080/docs/test.txt -o test.txt
 ```
 
 ## Kubernetes 部署

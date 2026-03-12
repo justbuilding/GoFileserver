@@ -96,7 +96,6 @@ func handleUpload(w http.ResponseWriter, r *http.Request) {
 
 	// 获取额外参数
 	dir := r.FormValue("dir")
-	token := r.FormValue("token")
 
 	// 构建保存路径
 	savePath := WebPath
@@ -129,16 +128,9 @@ func handleUpload(w http.ResponseWriter, r *http.Request) {
 	if dir != "" {
 		fmt.Fprintf(w, "Directory: %s\n", dir)
 	}
-	if token != "" {
-		fmt.Fprintf(w, "Token: %s\n", token)
-	}
 }
 
 func handleDownload(w http.ResponseWriter, r *http.Request) {
-	// 获取查询参数
-	token := r.URL.Query().Get("token")
-	version := r.URL.Query().Get("version")
-
 	// 提取文件路径（去掉查询参数）
 	filePath := r.URL.Path
 	if filePath == "/" {
@@ -156,14 +148,8 @@ func handleDownload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 输出下载信息和参数
+	// 输出下载信息
 	fmt.Printf("GoFileserver download request: %s\n", filePath)
-	if token != "" {
-		fmt.Printf("Token: %s\n", token)
-	}
-	if version != "" {
-		fmt.Printf("Version: %s\n", version)
-	}
 
 	// 提供文件下载
 	http.ServeFile(w, r, fullPath)
