@@ -106,13 +106,27 @@ curl "http://localhost:8080/docs/test.txt?token=secret123&version=1.0.0" -o test
 
 ## Kubernetes 部署
 
-### 快速部署
+### 快速部署（临时存储）
 
 ```bash
 # 应用部署配置
 kubectl apply -f k8s-deployment.yaml
 
 # 查看部署状态
+kubectl get deployments
+kubectl get pods
+kubectl get services
+```
+
+### 快速部署（持久化存储）
+
+```bash
+# 应用部署配置（包含 PV 和 PVC）
+kubectl apply -f k8s-deployment-pvc.yaml
+
+# 查看部署状态
+kubectl get pv
+kubectl get pvc
 kubectl get deployments
 kubectl get pods
 kubectl get services
@@ -129,12 +143,24 @@ http://<节点IP>:30080
 
 ### 配置说明
 
+#### 临时存储配置（k8s-deployment.yaml）
 - **副本数**：1
 - **容器端口**：8080
 - **NodePort**：30080
 - **资源限制**：CPU 1核，内存 512Mi
 - **健康检查**： readiness 和 liveness 探针
-- **存储**：使用 emptyDir 临时存储（可根据需要修改为持久卷）
+- **存储**：使用 emptyDir 临时存储
+
+#### 持久化存储配置（k8s-deployment-pvc.yaml）
+- **副本数**：1
+- **容器端口**：8080
+- **NodePort**：30080
+- **资源限制**：CPU 1核，内存 512Mi
+- **健康检查**： readiness 和 liveness 探针
+- **存储**：使用 PersistentVolume 和 PersistentVolumeClaim
+  - PV：10Gi 存储空间，hostPath 类型
+  - PVC：5Gi 存储请求
+  - 存储路径：`/data/gofileserver`
 
 ## License
 
