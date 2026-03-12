@@ -161,14 +161,44 @@ kubectl get pods
 kubectl get services
 ```
 
+### 快速部署（Ingress + 持久化存储）
+
+```bash
+# 应用部署配置（包含 PV、PVC 和 Ingress）
+kubectl apply -f k8s-deployment-ingress.yaml
+
+# 查看部署状态
+kubectl get pv
+kubectl get pvc
+kubectl get deployments
+kubectl get pods
+kubectl get services
+kubectl get ingress
+```
+
 ### 访问服务
 
+#### NodePort 访问
 服务将通过 NodePort 暴露在 `30080` 端口：
 
 ```bash
 # 访问地址
 http://<节点IP>:30080
 ```
+
+#### Ingress 访问
+通过 Ingress 配置，可以使用域名访问服务：
+
+1. **配置域名解析**：
+   - 将 `fileserver.example.com` 解析到您的 Kubernetes 集群入口 IP
+
+2. **访问地址**：
+   ```bash
+   http://fileserver.example.com
+   ```
+
+3. **自定义域名**：
+   - 编辑 `k8s-deployment-ingress.yaml` 文件，将 `fileserver.example.com` 改为您自己的域名
 
 ### 配置说明
 
@@ -185,11 +215,25 @@ http://<节点IP>:30080
 - **容器端口**：8080
 - **NodePort**：30080
 - **资源限制**：CPU 1核，内存 512Mi
-- **健康检查**： readiness 和 liveness 探针
 - **存储**：使用 PersistentVolume 和 PersistentVolumeClaim
   - PV：10Gi 存储空间，hostPath 类型
   - PVC：5Gi 存储请求
   - 存储路径：`/data/gofileserver`
+
+#### Ingress + 持久化存储配置（k8s-deployment-ingress.yaml）
+- **副本数**：1
+- **容器端口**：8080
+- **服务类型**：ClusterIP
+- **资源限制**：CPU 1核，内存 512Mi
+- **存储**：使用 PersistentVolume 和 PersistentVolumeClaim
+  - PV：10Gi 存储空间，hostPath 类型
+  - PVC：5Gi 存储请求
+  - 存储路径：`/data/gofileserver`
+- **Ingress 配置**：
+  - 域名：`fileserver.example.com`
+  - 路径：`/`
+  - 后端服务：gofileserver:8080
+  - 注解：使用 nginx ingress 控制器
 
 ## License
 
